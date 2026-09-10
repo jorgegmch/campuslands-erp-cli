@@ -1,4 +1,4 @@
-import modules.CRUD as c
+import modules.crud as c
 
 if __name__ == "__main__":
     c.login()

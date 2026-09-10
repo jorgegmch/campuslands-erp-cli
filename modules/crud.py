@@ -1,6 +1,5 @@
 import utils.utils as ut
-import modules.main as m
-import utils.utils as ut
+import modules.menus as m
 import json
 
 
@@ -64,6 +63,7 @@ evaluaciones = []
 cod_camper = None
 
 def login():
+    global cod_camper
     cargar_datos()
     isActiveLogin = True
     while isActiveLogin:
@@ -72,7 +72,6 @@ def login():
         print("-" * 50)
         print("\nMenú de login\n")
         print("1. Iniciar sesión")
-        print("2. Trainers y rutas (test)")
         print("0. Salir\n")
         option_login = input(">>> Ingrese una opción (0-1): ").strip()
         try:
@@ -98,14 +97,11 @@ def login():
                         elif rol == "trainer":
                             m.main_trainer()
                         elif rol == "camper":
+                            cod_camper = user_id
                             m.main_camper()
                         else:
                             print("⚠️ ID desconocido.")
                         ut.pause()
-
-                case "2":
-                    ut.clear_screen()
-                    ver_trainer_ruta()
 
                 case "0":
                     print("\n¡Gracias por usar CAMPUSLANDS!")
@@ -141,7 +137,7 @@ def registro_campers():
                     print("-" * 50)
                     print("\nRegistrando información del camper...\n")
                     cod_camper = ut.validador_input("\t> Número de identificación para el camper: ").strip()
-                    if cod_camper in usuarios and usuarios[cod_camper]["rol"] == "camper":
+                    if cod_camper in usuarios:
                         print("\nEste número de identificación ya fue registrado. Intente de nuevo.")
                     else:
                         nombres = ut.validador_input("\t> Nombre(s): ").title().strip()
@@ -188,14 +184,17 @@ def registro_campers():
                         
                             print(f"\t> Aspirante: {usuarios[cod_camper]['nombres']} {usuarios[cod_camper]['apellidos']}\n")
                             nota_prueba_inicio = int(input("\t> Nota de prueba inicial (0-100): "))
-                            usuarios[cod_camper]['nota_prueba_inicio'] = nota_prueba_inicio
-
-                            if nota_prueba_inicio >= 60:
-                                usuarios[cod_camper]['estado_camper'] = estados[1]
-                                print(f"\nEl aspirante aprobó la prueba inicial. Su estado ha cambiado a '{estados[1]}'.")
+                            if nota_prueba_inicio < 0 or nota_prueba_inicio > 100:
+                                print("\n⚠️ ERROR: La nota debe ser un número entero entre 0 y 100.")
                             else:
-                                usuarios[cod_camper]['estado_camper'] = estados[0]
-                                print("\nEl aspirante no aprobó la prueba inicial.")
+                                usuarios[cod_camper]['nota_prueba_inicio'] = nota_prueba_inicio
+
+                                if nota_prueba_inicio >= 60:
+                                    usuarios[cod_camper]['estado_camper'] = estados[1]
+                                    print(f"\nEl aspirante aprobó la prueba inicial. Su estado ha cambiado a '{estados[1]}'.")
+                                else:
+                                    usuarios[cod_camper]['estado_camper'] = estados[0]
+                                    print("\nEl aspirante no aprobó la prueba inicial.")
                         guardar_datos()
                     except ValueError:
                         print("\n⚠️ ERROR: La nota debe ser un número entero positivo entre 0 y 100.")
@@ -278,7 +277,7 @@ def registro_trainers():
                     print("-" * 50)
                     print("\nRegistrando información del trainer...\n")
                     user_trainer = ut.validador_input("\t> Ingrese el ID para el trainer: ").strip()
-                    if user_trainer in usuarios and usuarios[user_trainer]["rol"] == "trainer":
+                    if user_trainer in usuarios:
                         print("\nEste usuario ya ha sido registrado. Intente de nuevo.")
                     else:
                         nombre_trainer = ut.validador_input("\t> Nombre(s): ").title().strip()
@@ -342,8 +341,10 @@ def registro_trainers():
                     user_trainer = input("\t> Ingrese el ID del trainer: ").strip()
                     if user_trainer not in usuarios or usuarios[user_trainer]["rol"] != "trainer":
                         print("\nEste trainer aún no ha sido registrado. Intente nuevamente.")
-                    else:
-                        print(f"\t> Trainer: {usuarios[user_trainer]['nombres']} {usuarios[user_trainer]['apellidos']}\n")
+                        ut.pause()
+                        return
+
+                    print(f"\t> Trainer: {usuarios[user_trainer]['nombres']} {usuarios[user_trainer]['apellidos']}\n")
 
                     if not usuarios[user_trainer]['horario']:
                         print("\nEste trainer aún no tiene un horario asignado. Asigne un horario primero (opción 2).")
@@ -434,7 +435,10 @@ def gestion_rutas():
         cod_camper = input("\t> Número de identificación del camper: ").strip()
         if cod_camper not in usuarios or usuarios[cod_camper]["rol"] != "camper":
             print("\n⚠️ Este número de identificación no ha sido registrado. Intente de nuevo.\n")
-        
+
+        elif usuarios[cod_camper].get('ruta'):
+            print(f"\n⚠️ El camper '{usuarios[cod_camper]['nombres']} {usuarios[cod_camper]['apellidos']}' ya tiene una ruta asignada.\n")
+
         else:
             print(f"\t> Camper: {usuarios[cod_camper]['nombres']} {usuarios[cod_camper]['apellidos']}\n")
             print("-" * 25)
@@ -679,7 +683,6 @@ def ver_ruta_asignada():
     print("-" * 50)
     print("\n>> Ruta asignada <<\n")
     try:
-        cod_camper = input("\t> Número de identificación del camper: ").strip()
         if cod_camper not in usuarios or usuarios[cod_camper]["rol"] != "camper":
             print("\nEste número de identificación no ha sido registrado. Intente de nuevo.")
         else:
@@ -702,7 +705,6 @@ def ver_calificaciones():
     print("-" * 50)
     print("\n>> Calificaciones <<\n")
     try:
-        cod_camper = input("\t> Número de identificación del camper: ").strip()
         if cod_camper not in usuarios or usuarios[cod_camper]["rol"] != "camper":
             print("\nEste número de identificación no ha sido registrado. Intente de nuevo.")
         else:
@@ -804,59 +806,3 @@ def guardar_datos():
             json.dump(evaluaciones, f, ensure_ascii=False, indent=4)
     except Exception:
         print(f"⚠️ Error al guardar evaluaciones.")
-
-
-def ver_trainer_ruta():
-    ut.clear_screen
-    print("CAMPUSLANDS ADMIN")
-    print("-" * 50)
-    print("Visualizar trainers y rutas")
-    reporte_trainers_rutas = {
-    "id trainer" : {
-        "1999" : {
-            "nombres" : "Jorge Gomez",
-            "ruta" : "NodeJS (C#, MySQL, PostgreSQL)",
-            "salon" : "Sputnik",
-            "horario" : "06:00 - 10:00",
-            "rol" : "trainer"
-        }},
-    "id trainer" : {
-        "2000" : {
-            "nombres" : "Juan David Vesga",
-            "ruta" : "Java (JavaScript, MySQL, MongoDB)",
-            "salon" : "Artemis",
-            "horario" : "06:00 - 10:00",
-            "rol" : "trainer"
-        }},
-    "id trainer" : {
-        "2001" : {
-            "nombres" : "Brayan Espinosa",
-            "ruta" : "NetCore (JavaScript, MongoDB, PostgreSQL)",
-            "salon" : "Apolo",
-            "horario" : "10:00 - 14:00",
-            "rol" : "trainer"
-        }},
-    "id trainer" : {
-        "2002" : {
-            "nombres" : "Caroline Gomez",
-            "ruta" : "Spring Boot (Java, PostgreSQL, MySQL)",
-            "salon" : "Sputnik",
-            "horario" : "10:00 - 14:00",
-            "rol" : "trainer"
-        }},
-    "id trainer" : {
-        "2003" : {
-            "nombres" : "Silvia Silva",
-            "ruta" : "Express (C#, MongoDB, MySQL)",
-            "salon" : "Artemis",
-            "horario" : "14:00 - 18:00",
-            "rol" : "trainer"
-        }}
-    }
-    if not reporte_trainers_rutas:
-        print("No hay trainers registrados a la fecha.")
-    else:
-        print("TRAINERS DISPONIBLES Y RUTAS ASIGNADAS")
-        for trainer, info in reporte_trainers_rutas:
-            print(f"Trainer: {info['nombre']} | Ruta: {info['ruta']} - Salón: {info['salon']}")
-    ut.pause()

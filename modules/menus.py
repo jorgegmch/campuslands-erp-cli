@@ -1,6 +1,6 @@
 import utils.utils as ut
 import modules.messages as m
-import modules.CRUD as c
+import modules.crud as c
 
 def main_coordinador():
     isActiveCoordinador = True
