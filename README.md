@@ -68,12 +68,6 @@ Once running, you'll be prompted to log in, then routed through interactive menu
 - **Data model**: entities (users, enrollments, evaluations, areas) are normalized across separate JSON files rather than a single flat store, mirroring how you'd think about tables in a relational design.
 - **Known limitation**: JSON files are not safe for concurrent multi-user access — this is a single-session, local-use system by design.
 
-## Roadmap
-
-- [ ] Add unit tests for CRUD operations
-- [ ] Add input validation layer
-- [ ] Optional migration path to SQLite for concurrent access
-
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
