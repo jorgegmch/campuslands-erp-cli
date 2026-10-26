@@ -1,6 +1,6 @@
 # Campuslands ERP CLI
 
-![License: MIT](https://img.shields.io/badge/license-MIT-green)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A command-line ERP for academic management — student and trainer records, academic-risk tracking, scheduling, and reporting — built in pure Python with **file-based JSON persistence** and no external database or third-party dependencies.
 
@@ -74,4 +74,4 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ---
 
-Built by [Jorge Gomez](https://github.com/jorgegmch).
+Built by [jorgegmch](https://github.com/jorgegmch).
